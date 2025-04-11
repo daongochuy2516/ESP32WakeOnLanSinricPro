@@ -1,4 +1,4 @@
-# ESP32 SinricPro Wake-on-LAN Device
+# ESP32 SinricPro Wake-on-LAN Device (Haven't done yet.)
 
 A smart Wake-on-LAN (WOL) device using ESP32 with SinricPro integration for remote control or physical button activation.
 
