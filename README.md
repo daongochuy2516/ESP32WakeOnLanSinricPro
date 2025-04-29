@@ -1,101 +1,140 @@
 # ESP32 SinricPro Wake-on-LAN Device (Haven't done yet.)
 
-A smart Wake-on-LAN (WOL) device using ESP32 with SinricPro integration for remote control or physical button activation.
+A smart IoT device that lets you remotely power on your PC using Wake-on-LAN technology, with seamless integration for Google Home and Amazon Alexa via SinricPro.
 
-![Version](https://img.shields.io/badge/version-3.4.0-blue)
+![Version](https://img.shields.io/badge/version-3.6.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-## Features
+## 🌟 Features
 
-- **SinricPro Integration**: Control your PC power state remotely through the SinricPro platform
-- **Physical Button Support**: Send WOL packets with a simple button press
-- **Web Configuration Portal**: Easy setup via WiFi access point
-- **Visual/Audio Feedback**: Customizable RGB LED indicators and buzzer notifications
-- **OTA Updates**: Seamless firmware upgrades over-the-air
-- **Flexible WOL Modes**: Choose between SinricPro control, physical button, or both
-- **Persistent Settings**: Configuration stored in non-volatile memory
+- **Smart Home Integration**: Control your PC with voice commands through Google Home and Amazon Alexa
+- **Remote Power-On**: Wake your PC from anywhere as long as your ESP32 is on the same network as the PC
+- **Easy Setup**: Web configuration interface - no code modification needed
+- **Physical Control**: Optional physical button to manually wake your PC
+- **Status Indicators**: RGB LED effects to indicate system status
+- **Audible Feedback**: Optional buzzer notifications
+- **OTA Updates**: Support for over-the-air firmware updates
+- **Configurable Modes**: Choose between SinricPro control, physical button, or both
 
-## Hardware Requirements
+## 📋 Requirements
 
 - ESP32 development board
-- RGB LED (connected to pins 27, 26, 25)
-- Buzzer (connected to pin 33)
-- Push button (connected to pin 19)
-- Relay (optional, connected to pin 2)
+- RGB LED (common anode/cathode)
+- Buzzer (optional)
+- Momentary push button
+- PC with Wake-on-LAN capability (most laptops not supported)
+- SinricPro account
 
-## Installation
+## 🔌 Hardware Connections
 
-1. Clone this repository:
-   ```
-   git clone https://github.com/yourusername/esp32-sinricpro-wol.git
-   ```
-2. Open the project in Arduino IDE or PlatformIO
-3. Install the required libraries:
-   - [SinricPro](https://github.com/sinricpro/esp8266-esp32-sdk)
-   - [Arduino-WakeOnLan](https://github.com/a7md0/WakeOnLan)
-   - Preferences (built-in ESP32 library)
-4. Modify the configuration parameters in the code if needed
-5. Upload the firmware to your ESP32
+Default pin configuration:
+- **LED_RGB**: GPIO 27 (Red), GPIO 26 (Green), GPIO 25 (Blue)
+- **BUZZER**: GPIO 33
+- **PHY_BTN**: GPIO 19 (with internal pull-up)
 
-## Setup Instructions
+## 🛠️ Installation
 
-### Initial Configuration
+### 1. Upload the firmware
 
-1. Power on your ESP32 device
-2. Press and hold the BOOT button for 5+ seconds to enter AP Mode
-3. Connect to the "ESP32-SinricProWol" WiFi network (password: 12345678)
-4. Open a web browser and navigate to the configuration page (typically 192.168.4.1)
-5. Enter your:
-   - WiFi credentials (2.4GHz networks only)
-   - SinricPro APP_KEY and APP_SECRET (from SinricPro console)
-   - SinricPro DEVICE_ID (from SinricPro console)
-   - PC MAC address to wake (format: AA:BB:CC:DD:EE:FF)
-   - Configure WOL mode (SinricPro only, button only, or both)
-   - Toggle LED and buzzer effects
+Upload the code to your ESP32 using Arduino IDE or PlatformIO.
 
-### SinricPro Setup
+### 2. Initial Configuration
+
+After the first boot, the device will enter AP mode:
+1. Connect to the Wi-Fi network named `ESP32-SinricProWol` with password `12345678`
+2. Open a web browser and navigate to http://192.168.4.1
+3. Fill in the required configuration:
+   - Wi-Fi credentials (2.4GHz networks only)
+   - SinricPro details (App Key, App Secret, Device ID)
+   - PC MAC address
+   - Preferred operation mode and options
+4. Click "Save" and the device will restart
+
+### 3. SinricPro Setup
 
 1. Create an account at [SinricPro](https://sinric.pro)
 2. Add a new device (type: Switch)
-3. Copy the generated APP_KEY, APP_SECRET, and DEVICE_ID to the device configuration
+3. Copy the App Key, App Secret, and Device ID to the ESP32 configuration
+4. Link your SinricPro account with Google Home or Amazon Alexa
 
-## Usage
+## 💻 PC Configuration
 
-- **SinricPro Control**: Use the SinricPro app or integrations to turn on your device
-- **Button Control**: Short press the button to send a WOL packet
-- **Configuration Mode**: Long press (5+ seconds) to enter AP Mode
+To enable Wake-on-LAN on your PC:
 
-### Visual Feedback
+1. Enter BIOS/UEFI settings and enable Wake-on-LAN options
+2. In Windows:
+   - Open Device Manager
+   - Navigate to Network adapters
+   - Right-click your Ethernet adapter → Properties
+   - Go to Power Management tab
+   - Check "Allow this device to wake the computer"
+   - Go to Advanced tab
+   - Enable "Wake on Magic Packet" or similar option
 
-| LED Status | Meaning |
-|------------|---------|
-| Blue | AP Mode active |
-| Red Blinking | WiFi connection issue |
-| Red Solid | Sending WOL packet |
-| Green | Operation successful |
-| Rainbow Effect | Device idle (when enabled) |
+## 🎮 Usage
 
-## Troubleshooting
+### Voice Commands
 
-- If device doesn't connect to WiFi, check your credentials in AP Mode
-- Ensure your SinricPro keys are correct
-- Verify the MAC address format is correct (AA:BB:CC:DD:EE:FF)
-- Check that your PC has Wake-on-LAN enabled in BIOS and network adapter settings
+- "Hey Google, turn on [device name]" or "Alexa, turn on [device name]"
 
-## Screenshots
+### Physical Control
 
-<div align="center">
-  <img src="assets/config-page.png" alt="Configuration Page" width="400"/>
-</div>
+- **Short press** the button to send a Wake-on-LAN packet
+- **Long press** (5+ seconds) to enter configuration mode
 
-## Contributing
+## 🔄 Configuration Mode
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+You can re-enter configuration mode anytime by:
+1. Long-pressing the physical button for more than 5 seconds
+2. Connecting to `ESP32-SinricProWol` Wi-Fi network
+3. Navigating to http://192.168.4.1 in your browser
 
-## License
+## 📝 Operation Modes
 
-This project is open source under the MIT license - see the [LICENSE](LICENSE) file for details.
+- **Allow Both**: Control via SinricPro (voice commands) and physical button
+- **SinricPro Only**: Control via voice commands only
+- **Physical Button Only**: Control via physical button only
 
-## Credits
+## 🚨 Troubleshooting
 
-Developed by Dao Ngoc Huy
+### LED Indicators
+
+- **Blinking Red**: Wi-Fi connection issue
+- **Solid Red**: Sending WOL packet
+- **Solid Green**: Connected successfully
+- **Solid Blue**: In configuration mode or performing OTA update
+- **Rainbow Effect**: Normal operation (when RGB LED is enabled)
+
+### Common Issues
+
+- **PC won't wake up**: Check BIOS and OS WOL settings, verify MAC address
+- **Can't connect to Wi-Fi**: Ensure you're using a 2.4GHz network
+- **Voice commands not working**: Check SinricPro account linking with Google Home/Alexa
+
+## 🔄 Updates
+
+The device supports OTA (Over-The-Air) updates through the SinricPro platform.
+
+## ⚙️ Advanced Configuration
+
+You can customize the following parameters in the code:
+- PIN assignments
+- Buzzer duration
+- LED effects
+- Power-on duration
+
+## 📜 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Credits
+
+- Created by [daongochuy2516](https://github.com/daongochuy2516)
+- Uses [SinricPro](https://github.com/sinricpro/esp8266-esp32-sdk) library for IoT integration
+- Uses [WakeOnLan](https://github.com/a7md0/WakeOnLan) library
+
+## 📌 Notes
+
+- This project only works with PCs that support Wake-on-LAN functionality
+- Most laptops do not support Wake-on-LAN
+- The PC must be connected via Ethernet cable with Wake-on-LAN properly configured
