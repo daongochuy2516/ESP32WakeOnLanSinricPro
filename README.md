@@ -61,7 +61,7 @@ Upload the code to your ESP32 using Arduino IDE or PlatformIO.
 
 To enable Wake-on-LAN on your PC:
 - Google it — it's free.
-- 
+
 ## 🎮 Usage
 
 ### Voice Commands
