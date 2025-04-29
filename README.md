@@ -1,4 +1,4 @@
-# ESP32 SinricPro Wake-on-LAN Device (Haven't done yet.)
+# ESP32 SinricPro Wake-on-LAN Device
 
 A smart IoT device that lets you remotely power on your PC using Wake-on-LAN technology, with seamless integration for Google Home and Amazon Alexa via SinricPro.
 
@@ -40,7 +40,7 @@ Upload the code to your ESP32 using Arduino IDE or PlatformIO.
 
 ### 2. Initial Configuration
 
-After the first boot, the device will enter AP mode:
+- Press and hold the button for more than 5 seconds — the device will enter AP mode.
 1. Connect to the Wi-Fi network named `ESP32-SinricProWol` with password `12345678`
 2. Open a web browser and navigate to http://192.168.4.1
 3. Fill in the required configuration:
@@ -60,17 +60,8 @@ After the first boot, the device will enter AP mode:
 ## 💻 PC Configuration
 
 To enable Wake-on-LAN on your PC:
-
-1. Enter BIOS/UEFI settings and enable Wake-on-LAN options
-2. In Windows:
-   - Open Device Manager
-   - Navigate to Network adapters
-   - Right-click your Ethernet adapter → Properties
-   - Go to Power Management tab
-   - Check "Allow this device to wake the computer"
-   - Go to Advanced tab
-   - Enable "Wake on Magic Packet" or similar option
-
+- Google it — it's free.
+- 
 ## 🎮 Usage
 
 ### Voice Commands
@@ -125,7 +116,8 @@ You can customize the following parameters in the code:
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License — free to use and modify.  
+Please keep the original credit and respect the author's effort. Open source is built on trust!
 
 ## 🙏 Credits
 
