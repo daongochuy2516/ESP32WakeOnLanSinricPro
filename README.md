@@ -83,7 +83,7 @@ You can re-enter configuration mode anytime by:
 ## 📝 Operation Modes
 
 - **Allow Both**: Control via SinricPro (voice commands) and physical button
-- **SinricPro Only**: Control via voice commands only
+- **SinricPro Only**: Control via SinricPro only
 - **Physical Button Only**: Control via physical button only
 
 ## 🚨 Troubleshooting
@@ -111,8 +111,7 @@ The device supports OTA (Over-The-Air) updates through the SinricPro platform.
 You can customize the following parameters in the code:
 - PIN assignments
 - Buzzer duration
-- LED effects
-- Power-on duration
+- Logic code (only do this if you know what you're doing)
 
 ## 📜 License
 
