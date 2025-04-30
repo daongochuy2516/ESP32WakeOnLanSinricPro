@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "3.6.0"
+#define FIRMWARE_VERSION "3.6.2"
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
@@ -21,10 +21,9 @@
  *  - Seamlessly integrated with Google Home and Amazon Alexa via SinricPro.
  *  - No code modification needed for the default circuit; simply upload and enjoy!
  *  - Supports customizable hardware connections if needed.
- *  - Enjoy beautiful LED effects with RGB lighting to indicate system status.
  *  - Even if you are far away from your PC and on a different network, you can still turn it on as long as the ESP32 is on the same network as the PC,
- *    and the PC is connected via LAN cable with Wake-on-LAN configured properly.
- *  - IMPORTANT: If your PC cannot be woken up using Wake-on-LAN, this setup will not function correctly. Most laptops are not supported.
+ *    and the PC is connected via LAN with Wake-on-LAN configured properly.
+ *  - The ESP32 runs completely wirelessly, except for the power supply.
  *
  * Hardware connections (default):
  *   - LED_RGB -> GPIO 27 (Red), GPIO 26 (Green), GPIO 25 (Blue) — common anode/cathode RGB LED (PWM control)
@@ -585,17 +584,25 @@ bool handleOTAUpdate(const String& url, int major, int minor, int patch, bool fo
 // Callback từ SinricPro (Switch)
 bool onPowerState1(const String &deviceId, bool &state) {
     Serial.printf("Device 1 turned %s\n", state ? "on" : "off");
-    digitalWrite(RELAYPIN_1, state ? HIGH : LOW);
-    if (state && wolmode != "physical") {
-        Serial.println("Sending WOL Packet...");
-        isWOLActive = true;
-        setRGB(255, 0, 0);
-        controlBuzzer(true);
-        wolexec();
-        buzzerActive = true;
-        buzzerTimer = millis();
-        powerOffTimer = millis();
-        pendingOff = true;
+    if (state){
+        if (wolmode == "physical") {
+          state = false;
+          digitalWrite(RELAYPIN_1, LOW);
+          SinricPro.setResponseMessage("Control access from SinricPro is blocked. Please switch to WebAP mode to change this setting.");
+          return false;
+        }
+        if (wolmode != "physical") {
+            digitalWrite(RELAYPIN_1, state ? HIGH : LOW);
+            Serial.println("Sending WOL Packet...");
+            isWOLActive = true;
+            setRGB(255, 0, 0);
+            controlBuzzer(true);
+            wolexec();
+            buzzerActive = true;
+            buzzerTimer = millis();
+            powerOffTimer = millis();
+            pendingOff = true;
+        }
     }
     return true;
 }
