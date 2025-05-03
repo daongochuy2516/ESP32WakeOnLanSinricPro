@@ -13,7 +13,6 @@ A smart IoT device that lets you remotely power on your PC using Wake-on-LAN tec
 - **Physical Control**: Optional physical button to manually wake your PC
 - **Status Indicators**: RGB LED effects to indicate system status
 - **Audible Feedback**: Optional buzzer notifications
-- **OTA Updates**: Support for over-the-air firmware updates
 - **Configurable Modes**: Choose between SinricPro control, physical button, or both
 
 ## 📋 Requirements
