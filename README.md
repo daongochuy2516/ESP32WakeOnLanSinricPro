@@ -103,7 +103,7 @@ You can re-enter configuration mode anytime by:
 
 ## 🔄 Updates
 
-The device supports OTA (Over-The-Air) updates through the SinricPro platform, but only use this if you know what are you doing!
+The device supports OTA (Over-The-Air) updates through the SinricPro platform, but only use this if you know what you're doing!
 
 ## ⚙️ Advanced Configuration
 
