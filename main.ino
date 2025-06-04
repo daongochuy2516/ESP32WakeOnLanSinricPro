@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "3.6.2"
+#define FIRMWARE_VERSION "3.7.0"
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
@@ -52,12 +52,12 @@ Preferences preferences;
 //#define ENABLE_DEBUG
 
 // No need to edit this section — values will be automatically loaded from EEPROM (Preferences)
-#define WIFI_SSID         "Wi-Fi SSID"
-#define WIFI_PASS         "Wi-Fi Password"
-#define APP_KEY           "App Key from SinricPro"
-#define APP_SECRET        "App Secret from SinricPro"
-#define SWITCH_ID_1       "Device ID from SinricPro"
-#define PCMAC             "pcmac to wake up"
+#define WIFI_SSID         ""
+#define WIFI_PASS         ""
+#define APP_KEY           ""
+#define APP_SECRET        ""
+#define SWITCH_ID_1       ""
+#define PCMAC             ""
 #define RELAYPIN_1        2
 
 #define BEEP_TIME 500 // buzzer time
@@ -280,22 +280,22 @@ const char* htmlPage = R"rawliteral(
 
     <form action="/save" method="POST">
         <label for="ssid">Wi-Fi name (ONLY 2.4GHz pls):</label>
-        <input type="text" id="ssid" name="ssid" >
+        <input type="text" id="ssid" name="ssid" placeholder="%WIFI%">
 
         <label for="password">Wi-Fi Password:</label>
-        <input type="text" id="password" name="password" >
+        <input type="text" id="password" name="password" placeholder="%WIFIPASS%">
 
         <label for="appKey">APP KEY:</label>
-        <input type="text" id="appKey" name="appKey" >
+        <input type="text" id="appKey" name="appKey" placeholder="%APPKEY%">
 
         <label for="appSecret">APP SECRET:</label>
-        <input type="text" id="appSecret" name="appSecret" >
+        <input type="text" id="appSecret" name="appSecret" placeholder="%APPSECRET%">
 
         <label for="deviceId">DEVICE ID:</label>
-        <input type="text" id="deviceId" name="deviceId" >
+        <input type="text" id="deviceId" name="deviceId" placeholder="%DEVICEID%">
 
         <label for="pcMac">PC MAC Address:</label>
-        <input type="text" id="pcMac" name="pcMac" >
+        <input type="text" id="pcMac" name="pcMac" placeholder="%PCMAC%">
 
         <div class="form-group">
             <label for="wolMode">Wake-on-LAN Mode:</label>
@@ -325,9 +325,8 @@ const char* htmlPage = R"rawliteral(
             </label>
           </div>
           
-        <br>
-
         <input type="submit" value="Save">
+    </button>
     </form>
 
     <footer>
@@ -672,19 +671,32 @@ void handleSave() {
     ESP.restart();
 }
 
-// Hàm xử lý trang chủ của web AP
+// Hàm xử lý trang chủ của web AP (SSR - Server Side Rendering)
 void handleRoot() {
     String htmlContent = htmlPage;
     htmlContent.replace("%FIRMWARE_VERSION%", FIRMWARE_VERSION);
     String wolMode = readStringFromPrefs("wolMode", "both");
     String enableLed = readStringFromPrefs("enableLed", "off");
     String enableBuzzer = readStringFromPrefs("enableBuzzer", "off");
+    String wifiSSID = readStringFromPrefs("ssid", WIFI_SSID);
+    String wifiPASS = readStringFromPrefs("pass", WIFI_PASS);
+    String appKeyStored = readStringFromPrefs("appKey", APP_KEY);
+    String appSecretStored = readStringFromPrefs("appSecret", APP_SECRET);
+    String switchIdStored = readStringFromPrefs("deviceId", SWITCH_ID_1);
+    String pcMacStored = readStringFromPrefs("pcMac", "");
 
     htmlContent.replace("%WOL_MODE_BOTH%", (wolMode == "both" ? "selected" : ""));
     htmlContent.replace("%WOL_MODE_SINRIC%", (wolMode == "sinric" ? "selected" : ""));
     htmlContent.replace("%WOL_MODE_PHYSICAL%", (wolMode == "physical" ? "selected" : ""));
     htmlContent.replace("%ENABLE_LED%", (enableLed == "on" ? "checked" : ""));
     htmlContent.replace("%ENABLE_BUZZER%", (enableBuzzer == "on" ? "checked" : ""));
+    htmlContent.replace("%WIFI%", (wifiSSID.length() > 0 ? wifiSSID : "WiFi Name"));
+    htmlContent.replace("%WIFIPASS%", (wifiPASS.length() > 0 ? "●●●●●●●●" : "WiFi Password"));
+    htmlContent.replace("%APPKEY%", (appKeyStored.length() > 0 ? "●●●●●●●●" : "App Key"));
+    htmlContent.replace("%APPSECRET%", (appSecretStored.length() > 0 ? "●●●●●●●●" : "App Secret"));
+    htmlContent.replace("%DEVICEID%", (switchIdStored.length() > 0 ? switchIdStored : "Device ID"));
+    htmlContent.replace("%PCMAC%", (pcMacStored.length() > 0 ? pcMacStored : "00:11:22:33:44:55"));
+
     htmlContent = minifyHTML(htmlContent);
     server.send(200, "text/html", htmlContent);
 }
