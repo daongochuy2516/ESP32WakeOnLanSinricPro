@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "3.7.0"
+#define FIRMWARE_VERSION "3.7.1"
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
@@ -455,6 +455,16 @@ String minifyHTML(String html) {
   return html;
 }
 
+String fun(String html) {
+  String comment = "<!-- \n"
+                   "  Hey there, code explorer!\n"
+                   "  You won't find secrets here... or will you?\n"
+                   "  https://github.com/daongochuy2516/ESP32WakeOnLanSinricPro\n"
+                   "-->\n";
+  return comment + html;
+}
+
+
 
 //------------------------- Các hàm hỗ trợ ----------------------------
 
@@ -698,6 +708,7 @@ void handleRoot() {
     htmlContent.replace("%PCMAC%", (pcMacStored.length() > 0 ? pcMacStored : "00:11:22:33:44:55"));
 
     htmlContent = minifyHTML(htmlContent);
+    htmlContent = fun(htmlContent);
     server.send(200, "text/html", htmlContent);
 }
 void startAPMode() {
