@@ -763,7 +763,7 @@ void processButtonPress() {
             isWOLActive = true;
             setRGB(255, 0, 0);
             controlBuzzer(true);
-            setsinricstate(true);
+            setSinricState(true);
             wolexec();
             buzzerActive = true;
             buzzerTimer = millis();
@@ -786,7 +786,7 @@ void setupWiFi() {
 
     WiFi.begin(wifiSSID.c_str(), wifiPASS.c_str());
 }
-void setsinricstate(bool state){
+void setSinricState(bool state){
     String switchIdStored = readStringFromPrefs("deviceId", SWITCH_ID_1);
     SinricProSwitch& mySwitch1 = SinricPro[switchIdStored];
     mySwitch1.sendPowerStateEvent(state);
@@ -884,7 +884,7 @@ void loop() {
         if(!enablergb) setRGB(0,0,0);
     }
     if (powerOffTimer != 0 && millis () - powerOffTimer >= powerOnDuration && pendingOff){
-      setsinricstate(false);
+      setSinricState(false);
       digitalWrite(RELAYPIN_1, LOW);
       pendingOff = false;
     }
