@@ -711,6 +711,9 @@ void handleRoot() {
     htmlContent = fun(htmlContent);
     server.send(200, "text/html", htmlContent);
 }
+void handleFavicon(){
+    server.send(204);
+}
 void startAPMode() {
     Serial.println("Starting AP Mode...");
     setRGB(0, 0, 255);
@@ -722,6 +725,7 @@ void startAPMode() {
     
     server.on("/", HTTP_GET, handleRoot);
     server.on("/save", HTTP_POST, handleSave);
+    server.on("/favicon.ico", HTTP_GET, handleFavicon);
     server.begin();
     Serial.println("Web server started in AP Mode");
 }
