@@ -2,7 +2,7 @@
 
 A smart IoT device that lets you remotely power on your PC using Wake-on-LAN technology, with seamless integration for Google Home and Amazon Alexa via SinricPro.
 
-![Version](https://img.shields.io/badge/version-3.7.0-blue)
+![Version](https://img.shields.io/badge/version-3.7.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 🌟 Features
