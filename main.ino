@@ -52,10 +52,11 @@ HealthDiagnostics healthDiagnostics;
 
 WiFiUDP UDP;
 WakeOnLan WOL(UDP);
+WebServer server(80);
 
 // biến cho AP Mode và web server
 bool apModeFlag = false;
-WebServer server(80);
+
 
 // led, buzzer
 String wolmode;
