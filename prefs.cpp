@@ -3,7 +3,7 @@
 Preferences preferences;
 
 String readStringFromPrefs(const char* key, const String& defaultValue) {
-  preferences.begin("config", true); // Chế độ chỉ đọc
+  preferences.begin("config", true); // readonly
   String value = preferences.getString(key, defaultValue);
   preferences.end();
   return value;

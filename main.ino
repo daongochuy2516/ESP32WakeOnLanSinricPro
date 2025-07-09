@@ -52,7 +52,7 @@ HealthDiagnostics healthDiagnostics;
 // #define SINRICPRO_NOSSL // Uncomment if you have memory limitation issues.
 //#define ENABLE_DEBUG
 
-// No need to edit this section — values will be automatically loaded from EEPROM (Preferences)
+// i dont know why but dont touch this pls, it already work
 #define WIFI_SSID         ""
 #define WIFI_PASS         ""
 #define APP_KEY           ""

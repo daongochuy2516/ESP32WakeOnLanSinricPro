@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <Preferences.h>
 
-extern Preferences preferences; // <-- chỉ khai báo extern
+extern Preferences preferences;
 
 String readStringFromPrefs(const char* key, const String& defaultValue = "");
 void saveStringToPrefs(const char* key, const String& str);
