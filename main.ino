@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "3.7.6"
+#define FIRMWARE_VERSION "3.7.5"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -49,16 +49,6 @@ HealthDiagnostics healthDiagnostics;
 // Uncomment the following line to enable serial debug output
 // #define SINRICPRO_NOSSL // Uncomment if you have memory limitation issues.
 //#define ENABLE_DEBUG
-
-// i dont know why but dont touch this pls, it already work
-#define WIFI_SSID         ""
-#define WIFI_PASS         ""
-#define APP_KEY           ""
-#define APP_SECRET        ""
-#define SWITCH_ID_1       ""
-#define PCMAC             ""
-
-
 
 // biến cho AP Mode và web server
 bool apModeFlag = false;
@@ -130,7 +120,7 @@ void rainbowEffect() {
 
 void wolexec() {
     String pcMacStored = readStringFromPrefs("pcMac", "");
-    const char* mac = (pcMacStored.length() > 0) ? pcMacStored.c_str() : PCMAC;
+    const char* mac = pcMacStored.c_str();
     WOL.setRepeat(3, 100);
     WOL.calculateBroadcastAddress(WiFi.localIP(), WiFi.subnetMask());
     WOL.sendMagicPacket(mac);
@@ -268,11 +258,11 @@ void handleRoot() {
     String wolMode = readStringFromPrefs("wolMode", "both");
     String enableLed = readStringFromPrefs("enableLed", "off");
     String enableBuzzer = readStringFromPrefs("enableBuzzer", "off");
-    String wifiSSID = readStringFromPrefs("ssid", WIFI_SSID);
-    String wifiPASS = readStringFromPrefs("pass", WIFI_PASS);
-    String appKeyStored = readStringFromPrefs("appKey", APP_KEY);
-    String appSecretStored = readStringFromPrefs("appSecret", APP_SECRET);
-    String switchIdStored = readStringFromPrefs("deviceId", SWITCH_ID_1);
+    String wifiSSID = readStringFromPrefs("ssid");
+    String wifiPASS = readStringFromPrefs("pass");
+    String appKeyStored = readStringFromPrefs("appKey");
+    String appSecretStored = readStringFromPrefs("appSecret");
+    String switchIdStored = readStringFromPrefs("deviceId");
     String pcMacStored = readStringFromPrefs("pcMac", "");
 
     htmlContent.replace("%WOL_MODE_BOTH%", (wolMode == "both" ? "selected" : ""));
@@ -359,8 +349,8 @@ void setupWiFi() {
     WiFi.setSleep(false);
     WiFi.setAutoReconnect(true);
     WiFi.setHostname("ESP32-SinricPro");
-    String wifiSSID = readStringFromPrefs("ssid", WIFI_SSID);
-    String wifiPASS = readStringFromPrefs("pass", WIFI_PASS);
+    String wifiSSID = readStringFromPrefs("ssid");
+    String wifiPASS = readStringFromPrefs("pass");
     // Serial.println("Wi-Fi SSID: " + wifiSSID);
     // Serial.println("Wi-Fi PASS: " + wifiPASS);
 
@@ -368,15 +358,15 @@ void setupWiFi() {
 }
 // push state lên sinric
 void setSinricState(bool state){
-    String switchIdStored = readStringFromPrefs("deviceId", SWITCH_ID_1);
+    String switchIdStored = readStringFromPrefs("deviceId");
     SinricProSwitch& mySwitch1 = SinricPro[switchIdStored];
     mySwitch1.sendPowerStateEvent(state);
 }
 // khởi tạo sinric
 void setupSinricPro() {
-    String appKeyStored = readStringFromPrefs("appKey", APP_KEY);
-    String appSecretStored = readStringFromPrefs("appSecret", APP_SECRET);
-    String switchIdStored = readStringFromPrefs("deviceId", SWITCH_ID_1);
+    String appKeyStored = readStringFromPrefs("appKey");
+    String appSecretStored = readStringFromPrefs("appSecret");
+    String switchIdStored = readStringFromPrefs("deviceId");
     SinricProSwitch& mySwitch1 = SinricPro[switchIdStored];
     mySwitch1.onPowerState(onPowerState1);
 
@@ -404,8 +394,8 @@ void setupSinricPro() {
         Serial.println("eeprom sinric error");
     }
     SinricPro.begin(
-        appKeyStored.length() > 0 ? appKeyStored.c_str() : APP_KEY,
-        appSecretStored.length() > 0 ? appSecretStored.c_str() : APP_SECRET
+        appKeyStored.c_str(),
+         appSecretStored.c_str()
     );
 
 }
