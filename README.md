@@ -9,7 +9,7 @@ A smart IoT device that lets you remotely power on your PC using Wake-on-LAN tec
 
 - **Smart Home Integration**: Control your PC with voice commands through Google Home and Amazon Alexa
 - **Remote Power-On**: Wake your PC from anywhere as long as your ESP32 is on the same network as the PC
-- **Easy Setup**: Web configuration interface - no code modification needed
+- **Easy Setup**: Web configuration interface - no code modification needed ([demo](https://daongochuy2516.github.io/esp32))
 - **Physical Control**: Optional physical button to manually wake your PC
 - **Status Indicators**: RGB LED effects to indicate system status
 - **Audible Feedback**: Optional buzzer notifications
