@@ -15,6 +15,7 @@
 #include "SemVer.h"
 #include "prefs.h"
 #include "pins.h"
+#include "wol.h"
 #include "web.h"
 
 /*
@@ -50,8 +51,7 @@ HealthDiagnostics healthDiagnostics;
 //#define SINRICPRO_NOSSL // Uncomment if you have memory limitation issues.
 //#define ENABLE_DEBUG
 
-WiFiUDP UDP;
-WakeOnLan WOL(UDP);
+
 WebServer server(80);
 
 // biến cho AP Mode và web server
@@ -120,13 +120,7 @@ void rainbowEffect() {
     }
 }
 
-void wolExec() {
-    String pcMacStored = readStringFromPrefs("pcMac", "");
-    const char* mac = pcMacStored.c_str();
-    WOL.setRepeat(3, 100);
-    WOL.calculateBroadcastAddress(WiFi.localIP(), WiFi.subnetMask());
-    WOL.sendMagicPacket(mac);
-}
+
 
 bool handleOTAUpdate(const String& url, int major, int minor, int patch, bool forceUpdate) {
   Version currentVersion  = Version(FIRMWARE_VERSION);
