@@ -145,7 +145,6 @@ const char* homePage = R"rawliteral(
     .switch input:checked + .slider:before {
         transform: translateX(22px);
     }
-        /* Style for form and inputs */
     .form-group {
     margin-bottom: 20px;
     display: flex;
