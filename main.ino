@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "3.7.5"
+#define FIRMWARE_VERSION "3.7.6"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -14,6 +14,7 @@
 #include "htmlhelper.h"
 #include "SemVer.h"
 #include "prefs.h"
+#include "pins.h"
 #include "web.h"
 
 /*
@@ -41,11 +42,7 @@
  *  - After connecting to that Wi-Fi network, open a browser and go to http://192.168.4.1 to change settings.
  */
 
-#define LED_R  27  // Red channel of RGB LED
-#define LED_G  26  // Green channel of RGB LED
-#define LED_B  25  // Blue channel of RGB LED
-#define BUZZER 33  // Buzzer output
-#define PHY_BTN 19 // Physical Wake Button input
+
 
 HealthDiagnostics healthDiagnostics;
 
@@ -60,9 +57,7 @@ HealthDiagnostics healthDiagnostics;
 #define APP_SECRET        ""
 #define SWITCH_ID_1       ""
 #define PCMAC             ""
-#define RELAYPIN_1        2
 
-#define BEEP_TIME 500 // buzzer time
 
 
 // biến cho AP Mode và web server
