@@ -79,7 +79,7 @@ bool pendingOff=false;
 // cho xử lý nút 
 unsigned long buttonPressStartTime = 0;
 bool buttonPressed = false;
-#define LONG_PRESS_TIME 5000 // 5000 ms (5 giây)
+const int LONG_PRESS_TIME 5000 // 5000 ms (5 giây)
 
 //------------------------- Các hàm hỗ trợ ----------------------------
 
