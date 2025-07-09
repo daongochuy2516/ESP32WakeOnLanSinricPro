@@ -290,7 +290,7 @@ void handleRoot() {
     htmlContent.replace("%APPKEY%", (appKeyStored.length() > 0 ? "●●●●●●●●" : "App Key"));
     htmlContent.replace("%APPSECRET%", (appSecretStored.length() > 0 ? "●●●●●●●●" : "App Secret"));
     htmlContent.replace("%DEVICEID%", (switchIdStored.length() > 0 ? switchIdStored : "Device ID"));
-    htmlContent.replace("%PCMAC%", (pcMacStored.length() > 0 ? pcMacStored : "00:11:22:33:44:55"));
+    htmlContent.replace("%PCMAC%", (pcMacStored.length() > 0 ? pcMacStored : "00:1A:2B:3C:4D:5E"));
 
     htmlContent = minifyHTML(htmlContent);
     htmlContent = fun(htmlContent);
