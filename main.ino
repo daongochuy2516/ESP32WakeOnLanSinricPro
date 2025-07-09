@@ -47,8 +47,11 @@
 HealthDiagnostics healthDiagnostics;
 
 // Uncomment the following line to enable serial debug output
-// #define SINRICPRO_NOSSL // Uncomment if you have memory limitation issues.
+//#define SINRICPRO_NOSSL // Uncomment if you have memory limitation issues.
 //#define ENABLE_DEBUG
+
+WiFiUDP UDP;
+WakeOnLan WOL(UDP);
 
 // biến cho AP Mode và web server
 bool apModeFlag = false;
@@ -61,8 +64,7 @@ bool enablebuzzer;
 
 int rainbowSpeed = 20;
 unsigned long beepDuration = BEEP_TIME;
-WiFiUDP UDP;
-WakeOnLan WOL(UDP);
+
 unsigned long rainbowTimer = 0;
 unsigned long buzzerTimer = 0;
 bool buzzerActive = false;
@@ -118,7 +120,7 @@ void rainbowEffect() {
     }
 }
 
-void wolexec() {
+void wolExec() {
     String pcMacStored = readStringFromPrefs("pcMac", "");
     const char* mac = pcMacStored.c_str();
     WOL.setRepeat(3, 100);
@@ -176,7 +178,7 @@ bool onPowerState1(const String &deviceId, bool &state) {
             isWOLActive = true;
             setRGB(255, 0, 0);
             controlBuzzer(true);
-            wolexec();
+            wolExec();
             buzzerActive = true;
             buzzerTimer = millis();
             powerOffTimer = millis();
@@ -334,7 +336,7 @@ void processButtonPress() {
             setRGB(255, 0, 0);
             controlBuzzer(true);
             setSinricState(true);
-            wolexec();
+            wolExec();
             buzzerActive = true;
             buzzerTimer = millis();
             powerOffTimer = millis();
