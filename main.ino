@@ -47,12 +47,12 @@
 
 
 HealthDiagnostics healthDiagnostics;
-
+WebServer server(80);
 // Uncomment the following line to enable serial debug output
 //#define SINRICPRO_NOSSL // Uncomment if you have memory limitation issues.
 //#define ENABLE_DEBUG
 
-WebServer server(80);
+
 
 //------------------------- Các hàm hỗ trợ ----------------------------
 
