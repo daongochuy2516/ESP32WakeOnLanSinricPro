@@ -4,7 +4,7 @@
 //#include <Arduino.h>
 
 void initStartupConfig() {
-    apModeFlag = getAPMode();
+    apModeFlag   = getAPMode();
     wolmode      = checkWOLMode();
     enablergb    = checkLEDRainbow();
     enablebuzzer = checkBuzzer();
