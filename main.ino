@@ -16,6 +16,7 @@
 #include "prefs.h"
 #include "pins.h"
 #include "wol.h"
+#include "var.h"
 #include "web.h"
 
 /*
@@ -51,34 +52,7 @@ HealthDiagnostics healthDiagnostics;
 //#define SINRICPRO_NOSSL // Uncomment if you have memory limitation issues.
 //#define ENABLE_DEBUG
 
-
 WebServer server(80);
-
-// biến cho AP Mode và web server
-bool apModeFlag = false;
-
-// led, buzzer
-String wolmode;
-bool enablergb;
-bool enablebuzzer;
-
-int rainbowSpeed = 20;
-unsigned long beepDuration = BEEP_TIME;
-
-unsigned long rainbowTimer = 0;
-unsigned long buzzerTimer = 0;
-bool buzzerActive = false;
-bool isWOLActive = false;
-
-// cho xử lý tự động set status sinric về false
-unsigned long powerOnDuration = 2000;
-unsigned long powerOffTimer = 0;
-bool pendingOff=false;
-
-// cho xử lý nút 
-unsigned long buttonPressStartTime = 0;
-bool buttonPressed = false;
-const int LONG_PRESS_TIME = 5000; // 5000 ms (5 giây)
 
 //------------------------- Các hàm hỗ trợ ----------------------------
 
@@ -444,7 +418,7 @@ void loop() {
         blinkRed();
     }
 
-    if (buzzerActive && millis() - buzzerTimer >= BEEP_TIME ) {
+    if (buzzerActive && millis() - buzzerTimer >= beepDuration ) {
         digitalWrite(BUZZER, LOW);
         buzzerActive = false;
         isWOLActive = false;
