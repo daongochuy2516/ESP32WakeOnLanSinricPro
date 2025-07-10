@@ -57,7 +57,6 @@ WebServer server(80);
 
 //------------------------- Các hàm hỗ trợ ----------------------------
 
-
 void controlBuzzer(bool state) {
     if (enablebuzzer) {
         digitalWrite(BUZZER, state ? HIGH : LOW);
