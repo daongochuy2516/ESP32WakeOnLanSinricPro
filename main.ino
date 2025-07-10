@@ -11,6 +11,7 @@
 #include "SinricProSwitch.h"
 #include "HealthDiagnostics.h"
 #include "ESP32OTAHelper.h"
+#include "configinit.h"
 #include "htmlhelper.h"
 #include "SemVer.h"
 #include "prefs.h"
@@ -378,17 +379,11 @@ void setup() {
     pinMode(LED_R, OUTPUT);
     pinMode(LED_G, OUTPUT);
     pinMode(LED_B, OUTPUT);
-
-    apModeFlag = getAPMode();
+    initStartupConfig();
     if (apModeFlag) {
         startAPMode();
         return;
     }
-
-    wolmode = checkWOLMode();
-    enablergb = checkLEDRainbow();
-    enablebuzzer = checkBuzzer();
-
     setupWiFi();
     setupSinricPro();
 }
