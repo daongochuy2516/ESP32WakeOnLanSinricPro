@@ -239,7 +239,7 @@ const char* homePage = R"rawliteral(
     <footer>
         <p>You must connect this device to your own SinricPro account for it to function properly.<br>
         Otherwise, the device will not work correctly!<br>
-        Firmware Version: %FIRMWARE_VERSION%<br>
+        Firmware Version: %firmwareVersion%<br>
         Copyright © daongochuy2516
         </p>
     </footer>
