@@ -48,7 +48,7 @@
  */
 
 
-const char* const firmwareVersion = FIRMWARE_VERSION;
+const char* const firmwareVersion = FIRMWARE_VERSION; //make a copy so module can access it
 HealthDiagnostics healthDiagnostics;
 WebServer server(80);
 // Uncomment the following line to enable serial debug output
