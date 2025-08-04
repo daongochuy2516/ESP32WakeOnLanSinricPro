@@ -211,8 +211,7 @@ const char* homePage = R"rawliteral(
               <option value="sinric" %WOL_MODE_SINRIC% >SinricPro only</option>
               <option value="physical" %WOL_MODE_PHYSICAL% >Physical button only</option>
             </select>
-            <small class="note">Choose how the PC can be turned on. <br>
-                This option can only be changed on this page</small>
+            <small class="note">Choose how the PC can be turned on.</small>
           </div>
            
           
@@ -233,7 +232,6 @@ const char* homePage = R"rawliteral(
           </div>
           
         <input type="submit" value="Save">
-    </button>
     </form>
 
     <footer>

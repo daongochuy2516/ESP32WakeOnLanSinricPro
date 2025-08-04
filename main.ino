@@ -11,6 +11,7 @@
 #include "SinricProSwitch.h"
 #include "HealthDiagnostics.h"
 #include "ESP32OTAHelper.h"
+#include "handleUsbWeb.h"
 #include "configinit.h"
 #include "htmlhelper.h"
 #include "SemVer.h"
@@ -225,6 +226,7 @@ void setup() {
 }
 
 void loop() {
+    handleUsbWeb();
     if (apModeFlag) { //if yes, webui main loop
         server.handleClient();
         handleAPModeButton();
