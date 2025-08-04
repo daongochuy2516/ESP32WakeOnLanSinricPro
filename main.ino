@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "3.7.5"
+#define FIRMWARE_VERSION "3.7.6"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -215,8 +215,8 @@ void setup() {
     pinMode(LED_R, OUTPUT);
     pinMode(LED_G, OUTPUT);
     pinMode(LED_B, OUTPUT);
-    initStartupConfig();
-    if (apModeFlag) {
+    initStartupConfig(); //this will load vars from prefs, include the apmode flag
+    if (apModeFlag) { //if yes, start apmode and ignore below
         startAPMode();
         return;
     }
@@ -225,7 +225,7 @@ void setup() {
 }
 
 void loop() {
-    if (apModeFlag) {
+    if (apModeFlag) { //if yes, webui main loop
         server.handleClient();
         handleAPModeButton();
         return;
