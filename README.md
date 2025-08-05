@@ -2,18 +2,19 @@
 
 A smart IoT device that lets you remotely power on your PC using Wake-on-LAN technology, with seamless integration for Google Home and Amazon Alexa via SinricPro.
 
-![Version](https://img.shields.io/badge/version-3.7.5-blue)
+![Version](https://img.shields.io/badge/version-3.7.6-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 🌟 Features
 
-- **Smart Home Integration**: Control your PC with voice commands through Google Home and Amazon Alexa
-- **Remote Power-On**: Wake your PC from anywhere as long as your ESP32 is on the same network as the PC
-- **Easy Setup**: Web configuration interface - no code modification needed ([demo](https://daongochuy2516.github.io/esp32))
-- **Physical Control**: Optional physical button to manually wake your PC
-- **Status Indicators**: RGB LED effects to indicate system status
-- **Audible Feedback**: Optional buzzer notifications
-- **Configurable Modes**: Choose between SinricPro control, physical button, or both
+- **Smart Home Integration**: Control your PC with voice commands through Google Home and Amazon Alexa  
+- **Remote Power-On**: Wake your PC from anywhere as long as your ESP32 is on the same network as the PC  
+- **Plug-and-Play Web Setup**: No code, no tools, no AP mode — just visit the [Web Manager](https://daongochuy2516.github.io/esp32sinric/) to flash firmware and configure your ESP32 instantly (via USB)  
+- **Mobile-Friendly WebAP Mode** *(Fallback)*: Configure your ESP32 on mobile or when USB is unavailable by connecting to its Wi-Fi setup hotspot  
+- **Physical Control**: Optional physical button to manually wake your PC  
+- **Status Indicators**: RGB LED effects to indicate system status  
+- **Audible Feedback**: Optional buzzer notifications  
+- **Configurable Modes**: Choose between SinricPro control, physical button, or both  
 
 ## 📋 Requirements
 
@@ -33,28 +34,63 @@ Default pin configuration:
 
 ## 🛠️ Installation
 
-### 1. Upload the firmware
+### ⚡ Option 1: Easiest — No IDE Required
 
-Upload the code to your ESP32 using Arduino IDE or PlatformIO.
+Flash firmware and configure your ESP32 **directly from your browser** using the [Web Manager](https://daongochuy2516.github.io/esp32sinric/).
 
-### 2. Initial Configuration
+1. Open: **[https://daongochuy2516.github.io/esp32sinric/](https://daongochuy2516.github.io/esp32sinric/)**
+2. Connect your ESP32 via USB
+3. Click **"⚡ Flash Firmware"**, then **"🔌 Connect to Device"**
+4. If nothing happens, try holding the **BOOT** button to enter flash mode
 
-- Press and hold the button for more than 5 seconds — the device will enter AP mode.
-1. Connect to the Wi-Fi network named `ESP32-SinricProWol` with password `12345678`
-2. Open a web browser and navigate to http://192.168.4.1
-3. Fill in the required configuration:
-   - Wi-Fi credentials (2.4GHz networks only)
-   - SinricPro details (App Key, App Secret, Device ID)
-   - PC MAC address
-   - Preferred operation mode and options
-4. Click "Save" and the device will restart
+### 🧰 Option 2: Manual Flash (Arduino IDE / PlatformIO)
 
-### 3. SinricPro Setup
+Prefer to build it yourself?
 
-1. Create an account at [SinricPro](https://sinric.pro)
-2. Add a new device (type: Switch)
-3. Copy the App Key, App Secret, and Device ID to the ESP32 configuration
-4. Link your SinricPro account with Google Home or Amazon Alexa
+1. Clone this repository
+2. Open `main.ino` in **Arduino IDE** or use **PlatformIO** in VSCode
+3. Upload to your ESP32 as usual
+
+## ⚙️ Initial Configuration
+
+### 1. SinricPro Setup
+
+1. Create a free account at [SinricPro](https://sinric.pro)
+2. Add a new device (type: **Switch**)
+3. Copy these credentials — you'll need them later:
+
+   * **App Key**
+   * **App Secret**
+   * **Device ID**
+4. (Optional) Link your SinricPro account to **Google Home** or **Amazon Alexa**
+
+### 2. ESP32 Setup
+
+#### 📶 Option 1: Web Manager (Recommended)
+
+After flashing the firmware, you can configure your device directly via USB:
+
+1. Stay on the [Web Manager](https://daongochuy2516.github.io/esp32sinric/)
+2. Click **🔌 "Connect to Device"**
+3. Fill in the form:
+
+   * Wi-Fi credentials (2.4GHz only)
+   * SinricPro: App Key, Secret, Device ID
+   * PC MAC address
+   * Wake mode: Sinric, Physical Button, or Both
+4. Click **"Save"** — device will reboot and save your settings
+
+#### 📡 Option 2: AP Mode (Manual)
+
+If you're on mobile or USB is unavailable:
+
+1. **Hold the physical button for 5+ seconds** — device enters **AP mode**
+2. Connect to the Wi-Fi: `ESP32-SinricProWol` (password: `12345678`)
+3. In your browser, go to: [http://192.168.4.1](http://192.168.4.1)
+4. Fill in the configuration form (same details as above)
+5. Click **"Save"** — device will restart and exit AP mode
+
+> ℹ️ **Tip**: You only need to configure once — all settings are saved on the ESP32!
 
 ## 💻 PC Configuration
 
