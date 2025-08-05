@@ -40,7 +40,7 @@ Flash firmware and configure your ESP32 **directly from your browser** using the
 
 1. Open: **[https://daongochuy2516.github.io/esp32sinric/](https://daongochuy2516.github.io/esp32sinric/)**
 2. Connect your ESP32 via USB
-3. Click **"⚡ Flash Firmware"**, then **"🔌 Connect to Device"**
+3. Click **"⚡ Flash Firmware"**, then connect to device
 4. If nothing happens, try holding the **BOOT** button to enter flash mode
 
 ### 🧰 Option 2: Manual Flash (Arduino IDE / PlatformIO)
@@ -71,7 +71,7 @@ Prefer to build it yourself?
 After flashing the firmware, you can configure your device directly via USB:
 
 1. Stay on the [Web Manager](https://daongochuy2516.github.io/esp32sinric/)
-2. Click **🔌 "Connect to Device"**
+2. Click **"🔌Connect to Device"**
 3. Fill in the form:
 
    * Wi-Fi credentials (2.4GHz only)
