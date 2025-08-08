@@ -1,10 +1,13 @@
 #include "handleUsbWeb.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <WiFi.h>
 #include "prefs.h"
+#include "setupwifi.h"
 
 constexpr size_t USB_BUFFER_LIMIT = 512;
 static String serialBuffer = "";
+bool wifiPrevConnected = false;
 
 void handleSaveUsb(const String &json) {
   StaticJsonDocument<512> doc;
@@ -67,6 +70,32 @@ void handleUsbWeb() {
         handleSaveUsb(serialBuffer);
       } else if (serialBuffer == "RESTART") {
         ESP.restart();
+      } else if (serialBuffer == "SCAN_WIFI") {
+        wifiPrevConnected = (WiFi.status() == WL_CONNECTED);
+        Serial.println("SCANNING");
+        WiFi.mode(WIFI_STA);
+        WiFi.disconnect(true);
+        delay(200);
+
+        int n = WiFi.scanNetworks();
+        if (n <= 0) {
+          Serial.println("[]");
+          if (wifiPrevConnected) setupWiFi();
+          return;
+        }
+
+        String json = "[";
+        for (int i = 0; i < n; i++) {
+          json += "{\"ssid\":\"" + WiFi.SSID(i) + "\",";
+          json += "\"rssi\":" + String(WiFi.RSSI(i)) + ",";
+          json += "\"secure\":" + String(WiFi.encryptionType(i) != WIFI_AUTH_OPEN ? "true" : "false") + "}";
+          if (i < n - 1) json += ",";
+        }
+        json += "]";
+        Serial.println(json);
+        delay(500);
+        if (wifiPrevConnected) setupWiFi();
+        return;
       }
 
       serialBuffer = "";
