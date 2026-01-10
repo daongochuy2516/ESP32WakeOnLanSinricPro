@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "3.7.6"
+#define FIRMWARE_VERSION "3.7.7"
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -117,6 +117,21 @@ bool onPowerState1(const String &deviceId, bool &state) {
     }
     return true;
 }
+
+bool onSetModuleSetting(const String& id, SettingValue& value) {
+  // Handle module settings based on value type
+  if (std::holds_alternative<int>(value)) {
+    Serial.printf("Module setting %s = %d\r\n", id.c_str(), std::get<int>(value));
+  } else if (std::holds_alternative<float>(value)) {
+    Serial.printf("Module setting %s = %.2f\r\n", id.c_str(), std::get<float>(value));
+  } else if (std::holds_alternative<bool>(value)) {
+    Serial.printf("Module setting %s = %s\r\n", id.c_str(), std::get<bool>(value) ? "true" : "false");
+  } else if (std::holds_alternative<String>(value)) {
+    Serial.printf("Module setting %s = %s\r\n", id.c_str(), std::get<String>(value).c_str());
+  }
+  return true;
+}
+
 //------------------------- Chế độ Non-AP (Normal) ----------------------------
 
 // Hàm xử lý nút bấm khi ở chế độ bình thường
@@ -165,6 +180,7 @@ void setupSinricPro() {
     String appSecretStored = readStringFromPrefs("appSecret");
     String switchIdStored = readStringFromPrefs("deviceId");
     SinricProSwitch& mySwitch1 = SinricPro[switchIdStored];
+    
     mySwitch1.onPowerState(onPowerState1);
 
     SinricPro.onConnected([]() {
@@ -173,6 +189,7 @@ void setupSinricPro() {
     SinricPro.onDisconnected([]() {
         Serial.println("[SinricPro] Disconnected!");
     });
+    SinricPro.onSetSetting(onSetModuleSetting);
     SinricPro.onOTAUpdate(handleOTAUpdate);
     SinricPro.onReportHealth([&](String &healthReport) {
         return healthDiagnostics.reportHealth(healthReport);
@@ -190,6 +207,7 @@ void setupSinricPro() {
     } else {
         Serial.println("eeprom sinric error");
     }
+    
     SinricPro.begin(
         appKeyStored.c_str(),
          appSecretStored.c_str()
