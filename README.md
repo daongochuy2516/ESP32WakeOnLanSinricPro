@@ -2,7 +2,7 @@
 
 A smart IoT device that lets you remotely power on your PC using Wake-on-LAN technology, with seamless integration for Google Home and Amazon Alexa via SinricPro.
 
-![Version](https://img.shields.io/badge/version-3.7.6-blue)
+![Version](https://img.shields.io/badge/version-4.0.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 🌟 Features
@@ -43,13 +43,21 @@ Flash firmware and configure your ESP32 **directly from your browser** using the
 3. Click **"⚡ Flash Firmware"**, then connect to device
 4. If nothing happens, try holding the **BOOT** button to enter flash mode
 
-### 🧰 Option 2: Manual Flash (Arduino IDE / PlatformIO)
+### 🧰 Option 2: Manual Flash (PlatformIO)
 
-Prefer to build it yourself?
+Prefer to build it yourself? The project uses the standard **PlatformIO** layout:
+
+```
+platformio.ini   # board, core version, pinned libraries
+include/         # headers (pins.h, prefs.h, ...)
+src/             # sources (main.cpp = firmware version, sinric.cpp, wol.cpp, ...)
+```
 
 1. Clone this repository
-2. Open `main.ino` in **Arduino IDE** or use **PlatformIO** in VSCode
-3. Upload to your ESP32 as usual
+2. Open the folder in VSCode with the **PlatformIO** extension (or use the `pio` CLI)
+3. Build & upload: `pio run -t upload`, then `pio device monitor` for serial logs
+
+All dependencies (Arduino-ESP32 core 3.2.0 via [pioarduino](https://github.com/pioarduino/platform-espressif32), SinricPro, WebSockets, ArduinoJson, WakeOnLan) are pinned in `platformio.ini` and installed automatically.
 
 ## ⚙️ Initial Configuration
 
@@ -144,8 +152,9 @@ The device supports OTA (Over-The-Air) updates through the SinricPro platform, b
 ## ⚙️ Advanced Configuration
 
 You can customize the following parameters in the code:
-- PIN assignments
-- Buzzer duration
+- PIN assignments (`include/pins.h`)
+- Buzzer duration (`src/var.cpp`)
+- SinricPro debug output / NOSSL (`build_flags` in `platformio.ini`)
 - Logic code (only do this if you know what you're doing)
 
 ## 📜 License

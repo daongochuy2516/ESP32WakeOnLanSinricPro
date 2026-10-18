@@ -8,9 +8,11 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
+static WebServer server(80);
+
 
 // Hàm xử lý lưu cấu hình khi nhận POST từ web
-void handleSave() {
+static void handleSave() {
     // Lấy các giá trị POST từ form
     String ssid = server.arg("ssid");
     String password = server.arg("password");
@@ -73,7 +75,7 @@ void handleSave() {
 }
 
 // Hàm xử lý trang chủ của web AP (SSR - Server Side Rendering)
-void handleRoot() {
+static void handleRoot() {
     String htmlContent = homePage;
     htmlContent.replace("%firmwareVersion%", firmwareVersion);
     String wolMode = readStringFromPrefs("wolMode", "both");
@@ -102,7 +104,7 @@ void handleRoot() {
     htmlContent = fun(htmlContent);
     server.send(200, "text/html", htmlContent);
 }
-void handleFavicon(){
+static void handleFavicon(){
     server.send(204);
 }
 
@@ -123,10 +125,15 @@ void startAPMode() {
     Serial.println("Web server started in AP Mode");
 }
 
-void handleAPModeButton() {
+static void handleAPModeButton() {
     if (digitalRead(PHY_BTN) == LOW) {
         Serial.println("AP Mode exit button pressed");
         setAPMode(false);
         ESP.restart();
     }
+}
+
+void handleAPMode() {
+    server.handleClient();
+    handleAPModeButton();
 }
