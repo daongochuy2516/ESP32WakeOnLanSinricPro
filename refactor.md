@@ -1,71 +1,71 @@
 # Refactor: Arduino IDE → PlatformIO
 
-Nhánh: `bigrefactor` · Firmware: `3.7.6` → **`4.0.2`**
+Branch: `bigrefactor` · Firmware: `3.7.6` → **`4.0.2`**
 
-Ghi lại toàn bộ thay đổi khi chuyển project từ sketch Arduino IDE sang cấu trúc PlatformIO và cập nhật thư viện. Mục tiêu: **giữ nguyên hành vi và độ ổn định** của firmware đang chạy ngoài thực tế.
+A record of every change made while moving the project from an Arduino IDE sketch to a PlatformIO layout and updating the libraries. Goal: **keep the behavior and stability** of the firmware already running in the field.
 
 ---
 
-## 1. Tóm tắt
+## 1. Summary
 
-| Hạng mục | Trước | Sau |
+| Item | Before | After |
 |---|---|---|
 | Firmware version | 3.7.6 | **4.0.2** |
 | Build system | Arduino IDE (`main.ino`) | PlatformIO (`platformio.ini`) |
-| Bố cục | Tất cả file ở thư mục gốc | `include/` + `src/` |
-| Arduino-ESP32 core | 3.2.0 (cài trong IDE) | 3.2.0 (pioarduino `54.03.20`, pin cố định) |
+| Layout | Every file in the root folder | `include/` + `src/` |
+| Arduino-ESP32 core | 3.2.0 (installed in the IDE) | 3.2.0 (pioarduino `54.03.20`, pinned) |
 | SinricPro | 4.1.0 | **5.1.0** |
 | WebSockets | 2.7.2 | **2.7.3** |
 | ArduinoJson | 7.4.2 | **7.4.3** |
-| WakeOnLan | 1.1.7 | 1.1.7 (đã mới nhất) |
-| Flash (slot OTA 1,310,720 B) | 1,290,374 B | 1,291,110 B (98.5%, còn ~19.5 KB) |
+| WakeOnLan | 1.1.7 | 1.1.7 (already latest) |
+| Flash (OTA slot 1,310,720 B) | 1,290,374 B | 1,291,110 B (98.5%, ~19.5 KB free) |
 | RAM | 50,752 B | 50,744 B |
 
-Build thành công, không còn warning nào trong code của project. **Chưa test trên phần cứng thật.**
+The build succeeds with no warnings left in the project's own code. **Not yet tested on real hardware.**
 
 ---
 
-## 2. Cấu hình PlatformIO (`platformio.ini`)
+## 2. PlatformIO configuration (`platformio.ini`)
 
-- **Platform:** `pioarduino/platform-espressif32` bản `54.03.20` = Arduino-ESP32 core **3.2.0** / ESP-IDF 5.4.1. Platform `espressif32` chính thức của PlatformIO chỉ hỗ trợ core 2.x nên không dùng được.
-- **Thông số flash khớp với bản build Arduino IDE cũ.** Mình lấy các thông số này bằng cách đọc header của `build/esp32.esp32.esp32/main.ino.bin` và giải mã `main.ino.partitions.bin`:
+- **Platform:** `pioarduino/platform-espressif32` version `54.03.20` = Arduino-ESP32 core **3.2.0** / ESP-IDF 5.4.1. PlatformIO's official `espressif32` platform only supports core 2.x, so it can't be used.
+- **Flash settings match the old Arduino IDE build.** I got them by reading the header of `build/esp32.esp32.esp32/main.ino.bin` and decoding `main.ino.partitions.bin`:
   - `board = esp32dev`, 4MB, `flash_mode = dio`, `f_flash = 80MHz`
-  - `partitions = default.csv`: nvs, otadata, app0/app1 mỗi slot 0x140000 (1.25MB), spiffs, coredump
-- **Không được đổi partition table.** OTA chỉ ghi được vào slot app, không ghi được partition table. Thiết bị ngoài thực tế sẽ không nhận được bản OTA nào lớn hơn 1.25MB.
+  - `partitions = default.csv`: nvs, otadata, app0/app1 at 0x140000 (1.25MB) each, spiffs, coredump
+- **The partition table must not change.** OTA can only write to an app slot, not to the partition table. Devices in the field will not accept any OTA image larger than 1.25MB.
 - `monitor_speed = 115200`, `monitor_filters = esp32_exception_decoder`, `upload_speed = 921600`.
-- **Tất cả thư viện đều pin version chính xác** để build lặp lại được.
+- **Every library is pinned to an exact version** so builds are reproducible.
 - `build_flags`:
   - `-Wall`
-  - `-D SINRICPRO_NOMDNS` (xem mục 6)
-  - Có sẵn dòng comment cho `ENABLE_DEBUG` và `SINRICPRO_NOSSL`. Trước đây hai `#define` này nằm trong `main.ino` **sau** các dòng `#include`, nên dù bỏ comment cũng không có tác dụng. Giờ chúng nằm trong build_flags nên dùng được thật.
+  - `-D SINRICPRO_NOMDNS` (see section 6)
+  - Commented-out lines are ready for `ENABLE_DEBUG` and `SINRICPRO_NOSSL`. These two `#define`s used to sit in `main.ino` **after** the `#include` lines, so uncommenting them had no effect. In `build_flags` they actually work.
 
 ---
 
-## 3. Bố cục file
+## 3. File layout
 
-Mọi thao tác di chuyển đều dùng `git mv` nên lịch sử từng file vẫn còn.
+Every move was done with `git mv`, so each file keeps its history.
 
-### Di chuyển
+### Moved
 
-| Cũ | Mới |
+| Old | New |
 |---|---|
 | `main.ino` | `src/main.cpp` |
-| `ESP32OTAHelper.h` | `src/ota.cpp` (+ header mới `include/ota.h`) |
-| `SemVer.h` | `include/SemVer.h` (chỉ còn khai báo) + `src/SemVer.cpp` mới |
-| `*.h` còn lại | `include/` |
-| `*.cpp` còn lại | `src/` |
+| `ESP32OTAHelper.h` | `src/ota.cpp` (+ new header `include/ota.h`) |
+| `SemVer.h` | `include/SemVer.h` (declarations only) + new `src/SemVer.cpp` |
+| Remaining `*.h` | `include/` |
+| Remaining `*.cpp` | `src/` |
 
-### File mới
+### New files
 
-| File | Nội dung |
+| File | Contents |
 |---|---|
-| `platformio.ini` | Cấu hình build |
-| `include/sinric.h`, `src/sinric.cpp` | Toàn bộ code SinricPro |
-| `include/button.h`, `src/button.cpp` | Xử lý nút vật lý |
-| `include/ota.h` | Khai báo `startOtaUpdate()` |
-| `src/SemVer.cpp` | Phần cài đặt của class `Version` |
+| `platformio.ini` | Build configuration |
+| `include/sinric.h`, `src/sinric.cpp` | All SinricPro code |
+| `include/button.h`, `src/button.cpp` | Physical button handling |
+| `include/ota.h` | Declares `startOtaUpdate()` |
+| `src/SemVer.cpp` | Implementation of the `Version` class |
 
-### Cấu trúc cuối
+### Final structure
 
 ```
 platformio.ini
@@ -79,128 +79,128 @@ src/      HealthDiagnostics.cpp SemVer.cpp apmode.cpp button.cpp configinit.cpp
 
 ---
 
-## 4. Thay đổi trong code (giữ nguyên hành vi)
+## 4. Code changes (behavior unchanged)
 
 ### `src/main.cpp`
-- Chỉ còn `setup()`, `loop()` và một hàm `static handleWiFiStatus()`. Logic LED theo trạng thái WiFi trong hàm này giữ nguyên.
-- Thứ tự các bước trong `loop()` y như cũ: `handleUsbWeb` → (AP mode: `handleAPMode`) → `handleSinricPro` → `processButtonPress` → `handleWiFiStatus` → `handleWakeTimers`.
-- `setup()` giữ nguyên.
-- **Version firmware vẫn nằm ở dòng 1 của `main.cpp`** (`#define FIRMWARE_VERSION`), giống `main.ino` cũ. Các module khác đọc qua `const char* const firmwareVersion` (định nghĩa trong `main.cpp`, khai báo `extern` trong `apmode.h`, `handleUsbWeb.h`, `sinric.h`).
-- Bỏ các global `server` và `healthDiagnostics` khỏi `main`. Mỗi biến giờ thuộc về module dùng nó.
+- Now only holds `setup()`, `loop()` and one `static handleWiFiStatus()` function. Its WiFi-status LED logic is unchanged.
+- The order of steps in `loop()` is exactly as before: `handleUsbWeb` → (AP mode: `handleAPMode`) → `handleSinricPro` → `processButtonPress` → `handleWiFiStatus` → `handleWakeTimers`.
+- `setup()` is unchanged.
+- **The firmware version is still on line 1 of `main.cpp`** (`#define FIRMWARE_VERSION`), just like the old `main.ino`. Other modules read it through `const char* const firmwareVersion` (defined in `main.cpp`, declared `extern` in `apmode.h`, `handleUsbWeb.h`, `sinric.h`).
+- The `server` and `healthDiagnostics` globals are gone from `main`. Each now belongs to the module that uses it.
 
 ### `src/sinric.cpp`
-- Chứa `handleOTAUpdate`, `onPowerState1`, `setSinricState`, `setupSinricPro`, cùng `handleSinricPro()` mới (bọc `SinricPro.handle()`).
-- **Vì sao phải gom vào một file:** `SinricPro.h` định nghĩa object global `SinricPro` ngay trong header. Nếu include ở hai file `.cpp` trở lên sẽ bị lỗi *multiple definition* khi link. Các module khác gọi SinricPro thông qua `sinric.h`.
-- **Giữ việc báo version lên server.** SDK SinricPro chỉ gửi header `firmwareVersion` khi kết nối nếu `FIRMWARE_VERSION` đã được `#define` *trước* `#include "SinricPro.h"`. Ở `main.ino` cũ điều kiện này đúng. Sau khi tách module thì macro không còn thấy được trong `sinric.cpp`, nên bản refactor đầu tiên **ngừng báo version lên SinricPro** (lỗi đã sửa). Cách sửa: trong `sinric.cpp` đặt `#define FIRMWARE_VERSION firmwareVersion` trước dòng include, để SDK đọc chuỗi version định nghĩa ở `main.cpp`. Đã kiểm tra trong `firmware.bin` có chuỗi `firmwareVersion:`.
-- `healthDiagnostics` thành biến `static` của file. Lambda health-report đổi từ `[&]` sang `[]` vì không còn cần capture.
-- Trong `onPowerState1`, nhánh `if (wolmode != "physical")` thừa (nhánh trước đó đã `return`) được bỏ. Hành vi không đổi.
+- Holds `handleOTAUpdate`, `onPowerState1`, `setSinricState`, `setupSinricPro`, and the new `handleSinricPro()` (wraps `SinricPro.handle()`).
+- **Why it has to be one file:** `SinricPro.h` defines the global `SinricPro` object right in the header. Including it from two or more `.cpp` files causes a *multiple definition* error at link time. Other modules reach SinricPro through `sinric.h`.
+- **Version reporting to the server is kept.** The SinricPro SDK only sends the `firmwareVersion` header on connect if `FIRMWARE_VERSION` is `#define`d *before* `#include "SinricPro.h"`. That was true in the old `main.ino`. After the module split the macro was no longer visible in `sinric.cpp`, so the first refactor **stopped reporting the version to SinricPro** (bug since fixed). The fix: in `sinric.cpp`, put `#define FIRMWARE_VERSION firmwareVersion` before the include, so the SDK reads the version string defined in `main.cpp`. Verified that `firmware.bin` contains the `firmwareVersion:` string.
+- `healthDiagnostics` is now a file-`static` variable. The health-report lambda changed from `[&]` to `[]` since it no longer needs to capture anything.
+- In `onPowerState1`, the redundant `if (wolmode != "physical")` branch (the previous branch already `return`s) was removed. Behavior is unchanged.
 
-### `src/wol.cpp` (gộp logic đánh thức PC)
-- Callback SinricPro và nút bấm trước đây cùng chép một đoạn code. Giờ cả hai gọi chung `startWakeSequence(bool notifySinric)`, thứ tự các bước giữ nguyên:
-  relay HIGH → `isWOLActive` → LED đỏ → buzzer → (`setSinricState(true)` nếu là nút bấm) → `wolExec()` → đặt timer.
-  - Callback SinricPro gọi `startWakeSequence(false)`.
-  - Nút bấm gọi `startWakeSequence(true)`, giống code cũ.
-- `handleWakeTimers()` là đoạn tắt buzzer và tắt relay/trạng thái SinricPro, chuyển nguyên văn từ cuối `loop()` sang.
+### `src/wol.cpp` (shared PC wake-up logic)
+- The SinricPro callback and the button used to carry copies of the same code. Both now call `startWakeSequence(bool notifySinric)`, with the steps in the same order:
+  relay HIGH → `isWOLActive` → red LED → buzzer → (`setSinricState(true)` if triggered by the button) → `wolExec()` → arm timers.
+  - The SinricPro callback calls `startWakeSequence(false)`.
+  - The button calls `startWakeSequence(true)`, as in the old code.
+- `handleWakeTimers()` is the block that turns off the buzzer and switches the relay/SinricPro state off, moved verbatim from the end of `loop()`.
 
 ### `src/button.cpp`
-- `processButtonPress()` chuyển nguyên từ `main.ino`, chỉ thay đoạn code đánh thức bằng `startWakeSequence(true)`.
+- `processButtonPress()` moved as-is from `main.ino`; only the wake-up block was replaced with `startWakeSequence(true)`.
 
 ### `src/apmode.cpp`
-- `WebServer server(80)` chuyển từ `main.ino` vào đây thành biến `static`.
-- `handleSave`, `handleRoot`, `handleFavicon`, `handleAPModeButton` thành `static` (chỉ dùng nội bộ).
-- Thêm `handleAPMode()` = `server.handleClient()` + `handleAPModeButton()`, đúng hai lệnh mà `loop()` gọi trước đây.
+- `WebServer server(80)` moved here from `main.ino` as a `static` variable.
+- `handleSave`, `handleRoot`, `handleFavicon`, `handleAPModeButton` are now `static` (internal only).
+- Adds `handleAPMode()` = `server.handleClient()` + `handleAPModeButton()`, exactly the two calls `loop()` used to make.
 
 ### `src/ota.cpp`
-- Trước đây toàn bộ hàm được định nghĩa trong header `ESP32OTAHelper.h`. Giờ là file `.cpp` riêng, bỏ guard `#if defined(ESP32)`.
-- Thêm `#include <WiFi.h>`. Trước đây file này chỉ chạy được nhờ `main.ino` include `WiFi.h` trước nó.
-- Ép kiểu `(size_t)contentLength` khi so sánh để hết warning signed/unsigned.
+- The whole function used to be defined in the header `ESP32OTAHelper.h`. It is now its own `.cpp` file, without the `#if defined(ESP32)` guard.
+- Adds `#include <WiFi.h>`. Previously the file only compiled because `main.ino` included `WiFi.h` before it.
+- Casts `(size_t)contentLength` in the comparison to fix a signed/unsigned warning.
 
 ### `src/handleUsbWeb.cpp`
-- `wifiPrevConnected` thành `static`.
-- `StaticJsonDocument<512>` → `JsonDocument`. Ở ArduinoJson 7 hai kiểu này là một, nên hành vi không đổi.
-- `doc.containsKey("x")` → `doc["x"].is<JsonVariantConst>()`. Mình đã đọc source ArduinoJson 7.4.3: cả hai đều trả về true khi và chỉ khi key tồn tại, kể cả khi giá trị là null.
+- `wifiPrevConnected` is now `static`.
+- `StaticJsonDocument<512>` → `JsonDocument`. In ArduinoJson 7 these are the same type, so behavior is unchanged.
+- `doc.containsKey("x")` → `doc["x"].is<JsonVariantConst>()`. I read the ArduinoJson 7.4.3 source: both return true if and only if the key exists, even when its value is null.
 
-### Header
-- `apmode.h`: bỏ `extern WebServer server` và các handler nội bộ. Chỉ còn `extern firmwareVersion`, `startAPMode()`, `handleAPMode()`.
-- `wol.h`: bỏ `#include <WakeOnLan.h>` (chuyển vào `wol.cpp`), thêm `startWakeSequence()` và `handleWakeTimers()`.
+### Headers
+- `apmode.h`: drops `extern WebServer server` and the internal handlers. Only `extern firmwareVersion`, `startAPMode()` and `handleAPMode()` remain.
+- `wol.h`: drops `#include <WakeOnLan.h>` (moved into `wol.cpp`), adds `startWakeSequence()` and `handleWakeTimers()`.
 
-### Không đổi
-`HealthDiagnostics.*`, `configinit.*`, `htmlhelper.*`, `ledbuz.*`, `pins.h`, `prefs.*`, `setupwifi.*`, `var.*`, `web.*`: chỉ di chuyển, không sửa nội dung.
-
----
-
-## 5. Sửa lỗi (thay đổi hành vi có chủ đích)
-
-1. **So sánh version OTA sai** (`SemVer.cpp`). `operator>` cũ so từng phần riêng lẻ, nên `3.6.9 > 3.7.6` cho ra `true` (do patch 9 > 6) và thiết bị có thể bị OTA về bản cũ hơn. Giờ so theo thứ tự major → minor → patch. `operator<` được định nghĩa lại bằng `other > *this`.
-2. **Mất lệnh USB sau `SCAN_WIFI`** (`handleUsbWeb.cpp`). Nhánh `SCAN_WIFI` `return` mà không xoá `serialBuffer`, nên lệnh kế tiếp bị dính vào chuỗi cũ (ví dụ `SCAN_WIFIGET_CONFIG`) và bị bỏ qua. Giờ dòng lệnh được lấy ra và buffer được xoá **trước** khi xử lý.
-3. **Log trống khi firmware đã mới nhất** (`sinric.cpp`). Code cũ gọi `Serial.println(result)` **sau** `std::move(result)`, nên dòng in ra rỗng. Đã đổi thứ tự.
+### Unchanged
+`HealthDiagnostics.*`, `configinit.*`, `htmlhelper.*`, `ledbuz.*`, `pins.h`, `prefs.*`, `setupwifi.*`, `var.*`, `web.*`: moved only, contents untouched.
 
 ---
 
-## 6. Cập nhật thư viện
+## 5. Bug fixes (intentional behavior changes)
+
+1. **Wrong OTA version comparison** (`SemVer.cpp`). The old `operator>` compared each part on its own, so `3.6.9 > 3.7.6` returned `true` (because patch 9 > 6) and a device could be OTA-downgraded. It now compares major → minor → patch in order. `operator<` is redefined as `other > *this`.
+2. **USB command lost after `SCAN_WIFI`** (`handleUsbWeb.cpp`). The `SCAN_WIFI` branch `return`ed without clearing `serialBuffer`, so the next command was appended to the old string (e.g. `SCAN_WIFIGET_CONFIG`) and ignored. The line is now taken out and the buffer cleared **before** it is handled.
+3. **Empty log line when firmware is up to date** (`sinric.cpp`). The old code called `Serial.println(result)` **after** `std::move(result)`, so it printed an empty line. The order is fixed.
+
+---
+
+## 6. Library updates
 
 ### SinricPro 4.1.0 → 5.1.0
-- Đã đọc `changelog.md` của thư viện. Không có breaking change với code này: callback `onPowerState` dùng chung cho lệnh từ cloud và lệnh từ LAN.
-- **Tính năng mới: Local Control (LAN/UDP).** Thiết bị nghe lệnh tại multicast `224.9.9.9:3333` và unicast cổng 3333. Mọi lệnh được ký HMAC-SHA256 bằng `APP_SECRET`, sai chữ ký sẽ bị từ chối. Tính năng này đang **bật**.
-- **Behavior change từ thư viện:** lệnh đến qua UDP chỉ được trả lời qua UDP, không gửi lại lên cloud. Trạng thái tắt sau 2 giây của firmware vẫn được gửi lên cloud qua `sendPowerStateEvent` như cũ.
-- **Tắt quảng bá mDNS** bằng `-D SINRICPRO_NOMDNS`. Phần này kéo theo `ESPmDNS` + `libespressif__mdns`, tốn khoảng 7.5KB, và không cần thiết vì app gửi lệnh unicast tới IP mà cloud báo về. Điều khiển LAN vẫn hoạt động.
-- Bản 4.1.0 không có trên PlatformIO Registry (registry chỉ có 3.5.x và 5.x). Lúc chuyển đổi mình đã tạm pin theo git tag, sau đó bỏ khi lên 5.1.0.
+- Read the library's `changelog.md`. No breaking changes for this code: the `onPowerState` callback is shared by cloud and LAN commands.
+- **New feature: Local Control (LAN/UDP).** The device listens for commands on multicast `224.9.9.9:3333` and unicast port 3333. Every command is signed with HMAC-SHA256 using `APP_SECRET`; a bad signature is rejected. This feature is **enabled**.
+- **Behavior change from the library:** commands received over UDP are only answered over UDP, not reported back to the cloud. The firmware's "off" state after 2 seconds is still sent to the cloud via `sendPowerStateEvent` as before.
+- **mDNS announcement disabled** with `-D SINRICPRO_NOMDNS`. It pulls in `ESPmDNS` + `libespressif__mdns`, costs about 7.5KB, and isn't needed because the app sends unicast commands to the IP reported by the cloud. LAN control still works.
+- Version 4.1.0 is not on the PlatformIO Registry (the registry only has 3.5.x and 5.x). During the migration I temporarily pinned it by git tag, then dropped that when moving to 5.1.0.
 
 ### WebSockets 2.7.3, ArduinoJson 7.4.3
-- Bản vá nhỏ, không phải sửa code. WebSockets còn 1 warning deprecated (`NetworkClient::flush()`) nằm trong code của thư viện, không phải code project.
+- Minor patches, no code changes needed. WebSockets still has 1 deprecation warning (`NetworkClient::flush()`) inside the library's code, not the project's.
 
 ---
 
-## 7. Vì sao không lên core 3.3.12
+## 7. Why not core 3.3.12
 
-Mình đã thử build với core mới nhất (pioarduino `55.03.312-1` = Arduino-ESP32 3.3.12 / IDF 5.5.5):
+I tried building with the latest core (pioarduino `55.03.312-1` = Arduino-ESP32 3.3.12 / IDF 5.5.5):
 
-| Cấu hình | Kích thước | Còn trống trong slot OTA |
+| Configuration | Size | Free in OTA slot |
 |---|---|---|
-| Core 3.3.12 + libs mới (mDNS bật) | 1,318,110 B | **tràn 7.4 KB** |
-| Core 3.3.12 + libs mới + `SINRICPRO_NOMDNS` | 1,310,590 B | 130 B |
-| Core 3.3.12 + libs mới + `SINRICPRO_NO_LOCAL_CONTROL` | 1,310,054 B | 666 B |
-| **Core 3.2.0 + libs mới + `SINRICPRO_NOMDNS`** (đang dùng) | **1,291,110 B** | **~19.5 KB** |
+| Core 3.3.12 + new libs (mDNS on) | 1,318,110 B | **overflows by 7.4 KB** |
+| Core 3.3.12 + new libs + `SINRICPRO_NOMDNS` | 1,310,590 B | 130 B |
+| Core 3.3.12 + new libs + `SINRICPRO_NO_LOCAL_CONTROL` | 1,310,054 B | 666 B |
+| **Core 3.2.0 + new libs + `SINRICPRO_NOMDNS`** (in use) | **1,291,110 B** | **~19.5 KB** |
 
-So sánh symbol giữa hai bản build cho thấy phần tăng chủ yếu nằm trong core/IDF 5.5: lwip +24KB, Arduino core +11KB, WiFi blob +10KB. SinricPro 5 chỉ thêm khoảng 1.5KB. Các phần của core/IDF là thư viện biên dịch sẵn, không cắt được nếu không build lại toàn bộ IDF với `custom_sdkconfig`, cách đó chậm và rủi ro hơn.
+Comparing symbols between the two builds shows the growth is mostly in core/IDF 5.5: lwip +24KB, Arduino core +11KB, WiFi blob +10KB. SinricPro 5 only adds about 1.5KB. The core/IDF parts are precompiled libraries and can't be trimmed without rebuilding the whole IDF with `custom_sdkconfig`, which is slower and riskier.
 
-**Muốn lên core 3.3.x sau này:** đổi `board_build.partitions = min_spiffs.csv` (slot app 1.9MB; code không dùng SPIFFS). Đổi xong, mọi thiết bị cũ phải nạp lại qua USB/Web Manager một lần. Không nạp lại thì OTA sẽ báo lỗi "Not enough space to begin OTA" (thiết bị không bị brick).
-
----
-
-## 8. Cách kiểm chứng
-
-- **Refactor không làm thay đổi code sinh ra:** build code gốc (HEAD trước refactor, lấy bằng `git archive`) và code mới với cùng một `platformio.ini` (core 3.2.0, SinricPro 4.1.0):
-  - Gốc: Flash 1,290,374 B, RAM 50,752 B
-  - Refactor: Flash 1,290,358 B, RAM 50,744 B (nhỏ hơn 16 byte)
-- Thư mục `build/` của Arduino IDE (04/08/2025) **không dùng làm mốc so sánh được**. Bản đó cũ hơn code hiện tại (chưa có `handleUsbWeb`) và được build với SinricPro 3.5.0 / ArduinoJson 7.3.1.
-- Build cuối: `pio run` thành công, không còn warning trong `src/`.
+**To move to core 3.3.x later:** change `board_build.partitions = min_spiffs.csv` (1.9MB app slot; the code doesn't use SPIFFS). After that, every existing device has to be reflashed once over USB/Web Manager. Without reflashing, OTA will fail with "Not enough space to begin OTA" (the device is not bricked).
 
 ---
 
-## 9. Sự cố môi trường (máy dev, không liên quan đến code)
+## 8. Verification
 
-- **Python penv của PlatformIO bị hỏng** khi platform pioarduino 55.x cài Python dependencies. Platform cài vào `~/.platformio/penv` trong lúc chính `pio` đang chạy, nên Windows khoá file `.pyd` của `charset-normalizer` và gói này bị cài dở. Mình đã sửa bằng cách:
-  - chạy lại `uv pip install ...` khi không có tiến trình `pio` nào đang chạy;
-  - xoá thư mục `charset_normalizer-3.5.1.dist-info` còn sót (thiếu file `RECORD`).
-- **pioarduino 55.x không cài được toolchain dưới Git Bash/MSYS** (lỗi `MSys/Mingw is not supported`). Chạy từ PowerShell hoặc từ extension PlatformIO trong VSCode thì bình thường.
-- Platform 55.03.312-1 (core 3.3.12) vẫn còn trong `~/.platformio/platforms`, có thể xoá nếu không cần.
+- **The refactor doesn't change the generated code:** built the original code (HEAD before the refactor, taken with `git archive`) and the new code with the same `platformio.ini` (core 3.2.0, SinricPro 4.1.0):
+  - Original: Flash 1,290,374 B, RAM 50,752 B
+  - Refactor: Flash 1,290,358 B, RAM 50,744 B (16 bytes smaller)
+- The Arduino IDE `build/` folder (04/08/2025) **can't be used as a baseline**. It is older than the current code (no `handleUsbWeb` yet) and was built with SinricPro 3.5.0 / ArduinoJson 7.3.1.
+- Final build: `pio run` succeeds, no warnings left in `src/`.
 
 ---
 
-## 10. File khác
+## 9. Environment issues (dev machine, unrelated to the code)
 
-- `.gitignore`: thêm `.env` / `.env.*` (giữ lại `.env.example`), `.pio/` và các file sinh tự động trong `.vscode/` (`.browse.c_cpp.db*`, `c_cpp_properties.json`, `launch.json`, `ipch`).
-- `tools/test.py` (mới): gửi lệnh `setPowerState` có ký HMAC tới thiết bị qua UDP 3333 để test Local Control của SinricPro 5. Dùng `--bad-signature` để kiểm tra thiết bị từ chối lệnh ký sai. IP, Device ID và App Secret được đọc tự động từ `.env` ở thư mục gốc (mẫu ở `.env.example`). **Đã test trên ESP32 thật:** lệnh ký đúng trả về `success: true` sau khoảng 312 ms. Phần lớn thời gian này là do `wolExec()` gửi magic packet 3 lần, cách nhau 100 ms, trước khi thiết bị trả lời. Lệnh ký sai bị từ chối với `Signature is invalid` sau 16 ms. Như vậy việc SDK mở cổng UDP trước khi WiFi kết nối xong không gây lỗi.
+- **PlatformIO's Python penv got corrupted** when the pioarduino 55.x platform installed its Python dependencies. The platform installs into `~/.platformio/penv` while `pio` itself is running, so Windows locked `charset-normalizer`'s `.pyd` file and the package was left half-installed. Fixed by:
+  - rerunning `uv pip install ...` with no `pio` process running;
+  - deleting the leftover `charset_normalizer-3.5.1.dist-info` folder (missing its `RECORD` file).
+- **pioarduino 55.x can't install its toolchain under Git Bash/MSYS** (error `MSys/Mingw is not supported`). Running from PowerShell or from the PlatformIO extension in VSCode works fine.
+- Platform 55.03.312-1 (core 3.3.12) is still in `~/.platformio/platforms` and can be deleted if not needed.
+
+---
+
+## 10. Other files
+
+- `.gitignore`: adds `.env` / `.env.*` (keeping `.env.example`), `.pio/` and generated files under `.vscode/` (`.browse.c_cpp.db*`, `c_cpp_properties.json`, `launch.json`, `ipch`).
+- `tools/test.py` (new): sends an HMAC-signed `setPowerState` command to the device over UDP 3333 to test SinricPro 5 Local Control. Use `--bad-signature` to check that the device rejects badly signed commands. The IP, Device ID and App Secret are read automatically from `.env` in the root folder (template in `.env.example`). **Tested on a real ESP32:** a correctly signed command returns `success: true` after about 312 ms. Most of that time is `wolExec()` sending the magic packet 3 times, 100 ms apart, before the device replies. A badly signed command is rejected with `Signature is invalid` after 16 ms. So the SDK opening the UDP port before WiFi finishes connecting causes no problems.
 - `README.md`:
-  - Mục *Manual Flash* viết lại cho PlatformIO, có sơ đồ thư mục và lệnh `pio run -t upload` / `pio device monitor`.
-  - Mục *Advanced Configuration* trỏ tới `include/pins.h`, `src/var.cpp` và `build_flags` trong `platformio.ini`.
+  - The *Manual Flash* section is rewritten for PlatformIO, with a folder diagram and the `pio run -t upload` / `pio device monitor` commands.
+  - The *Advanced Configuration* section points to `include/pins.h`, `src/var.cpp` and `build_flags` in `platformio.ini`.
 
 ---
 
-## 11. Việc còn lại
+## 11. Remaining work
 
-- [ ] Nạp lên ESP32 thật và kiểm tra: kết nối WiFi, bật qua SinricPro (Google Home/Alexa), nút ngắn, nút giữ 5 giây vào AP mode, trang cấu hình `192.168.4.1`, Web Manager qua USB (`GET_CONFIG`, `SCAN_WIFI` rồi gửi lệnh khác ngay sau, lưu cấu hình), OTA, Local Control (`tools/test.py`).
-- [ ] Kiểm tra Web Manager (`daongochuy2516.github.io/esp32sinric`) với file build mới. Output của PlatformIO nằm ở `.pio/build/esp32dev/` (`firmware.bin`, `bootloader.bin`, `partitions.bin`), tên và đường dẫn khác với bản Arduino IDE. Với core 3.2.0, PlatformIO **không** tạo file merged (`main.ino.merged.bin` như Arduino IDE). Nếu Web Manager cần file này thì phải ghép bằng `esptool.py merge_bin`.
-- [x] Tăng `FIRMWARE_VERSION` lên `4.0.2` (dòng 1 của `src/main.cpp` và badge README). Thiết bị cũ chạy 3.7.6 vẫn nhận bản này qua OTA: hàm so sánh version cũ (còn lỗi) xét major trước, mà `4 > 3`, nên vẫn ra kết quả đúng.
-- [ ] Commit nhánh `bigrefactor` (chưa commit).
+- [ ] Flash a real ESP32 and check: WiFi connection, power on through SinricPro (Google Home/Alexa), short press, 5-second hold to enter AP mode, config page at `192.168.4.1`, USB Web Manager (`GET_CONFIG`, `SCAN_WIFI` followed immediately by another command, saving config), OTA, Local Control (`tools/test.py`).
+- [ ] Check the Web Manager (`daongochuy2516.github.io/esp32sinric`) with the new build files. PlatformIO output is in `.pio/build/esp32dev/` (`firmware.bin`, `bootloader.bin`, `partitions.bin`), with different names and paths from the Arduino IDE build. With core 3.2.0, PlatformIO does **not** produce a merged image (like Arduino IDE's `main.ino.merged.bin`). If the Web Manager needs one, build it with `esptool.py merge_bin`.
+- [x] Bump `FIRMWARE_VERSION` to `4.0.2` (line 1 of `src/main.cpp` and the README badge). Devices running 3.7.6 still accept this build over OTA: the old (buggy) version comparison checks major first, and `4 > 3`, so it gives the right result.
+- [x] Commit the `bigrefactor` branch (merged into `main` via #2).
