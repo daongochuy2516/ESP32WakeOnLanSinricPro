@@ -1,6 +1,5 @@
-#if defined(ESP32)
-
-#include <Arduino.h>
+#include "ota.h"
+#include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <Update.h>
@@ -31,7 +30,7 @@ String startOtaUpdate(const String &url) {
     WiFiClient *stream  = https.getStreamPtr();
     size_t      written = Update.writeStream(*stream);
 
-    if (written != contentLength) return "Written only : " + String(written) + "/" + String(contentLength) + ". Retry?";
+    if (written != (size_t)contentLength) return "Written only : " + String(written) + "/" + String(contentLength) + ". Retry?";
     Serial.println("[startOtaUpdate()] Written : " + String(written) + " successfully");
     
     if (!Update.end()) return "Error Occurred. Error #: " + String(Update.getError());
@@ -43,5 +42,3 @@ String startOtaUpdate(const String &url) {
 
     return "";
 }
-
-#endif

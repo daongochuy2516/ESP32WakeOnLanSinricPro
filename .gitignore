@@ -1,2 +1,11 @@
 /build
-/build
+.pio/
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch
+
+# local secrets (see .env.example)
+.env
+.env.*
+!.env.example

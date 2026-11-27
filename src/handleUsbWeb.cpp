@@ -7,10 +7,10 @@
 
 constexpr size_t USB_BUFFER_LIMIT = 512;
 static String serialBuffer = "";
-bool wifiPrevConnected = false;
+static bool wifiPrevConnected = false;
 
 void handleSaveUsb(const String &json) {
-  StaticJsonDocument<512> doc;
+  JsonDocument doc;
   DeserializationError err = deserializeJson(doc, json);
 
   if (err) {
@@ -18,13 +18,13 @@ void handleSaveUsb(const String &json) {
     return;
   }
 
-  if (doc.containsKey("ssid")) saveStringToPrefs("ssid", doc["ssid"].as<String>());
-  if (doc.containsKey("password")) saveStringToPrefs("pass", doc["password"].as<String>());
-  if (doc.containsKey("appKey")) saveStringToPrefs("appKey", doc["appKey"].as<String>());
-  if (doc.containsKey("appSecret")) saveStringToPrefs("appSecret", doc["appSecret"].as<String>());
-  if (doc.containsKey("deviceId")) saveStringToPrefs("deviceId", doc["deviceId"].as<String>());
-  if (doc.containsKey("pcMac")) saveStringToPrefs("pcMac", doc["pcMac"].as<String>());
-  if (doc.containsKey("wolMode")) saveStringToPrefs("wolMode", doc["wolMode"].as<String>());
+  if (doc["ssid"].is<JsonVariantConst>()) saveStringToPrefs("ssid", doc["ssid"].as<String>());
+  if (doc["password"].is<JsonVariantConst>()) saveStringToPrefs("pass", doc["password"].as<String>());
+  if (doc["appKey"].is<JsonVariantConst>()) saveStringToPrefs("appKey", doc["appKey"].as<String>());
+  if (doc["appSecret"].is<JsonVariantConst>()) saveStringToPrefs("appSecret", doc["appSecret"].as<String>());
+  if (doc["deviceId"].is<JsonVariantConst>()) saveStringToPrefs("deviceId", doc["deviceId"].as<String>());
+  if (doc["pcMac"].is<JsonVariantConst>()) saveStringToPrefs("pcMac", doc["pcMac"].as<String>());
+  if (doc["wolMode"].is<JsonVariantConst>()) saveStringToPrefs("wolMode", doc["wolMode"].as<String>());
 
   if (doc["enableLed"]) {
     saveStringToPrefs("enableLed", "on");
@@ -46,10 +46,14 @@ void handleUsbWeb() {
     char c = Serial.read();
 
     if (c == '\n') {
-      serialBuffer.trim();
+      // Take the line out of the buffer before handling it, so the early
+      // returns below (SCAN_WIFI) can't leave a stale command behind.
+      String line = serialBuffer;
+      serialBuffer = "";
+      line.trim();
 
-      if (serialBuffer == "GET_CONFIG") {
-        StaticJsonDocument<512> doc;
+      if (line == "GET_CONFIG") {
+        JsonDocument doc;
 
         doc["ssid"] = readStringFromPrefs("ssid");
         doc["password"] = readStringFromPrefs("pass");
@@ -64,13 +68,13 @@ void handleUsbWeb() {
 
         serializeJson(doc, Serial);
         Serial.println();
-      } else if (serialBuffer == "PING") {
+      } else if (line == "PING") {
         Serial.println("PONG");
-      } else if (serialBuffer.startsWith("{") && serialBuffer.endsWith("}")) {
-        handleSaveUsb(serialBuffer);
-      } else if (serialBuffer == "RESTART") {
+      } else if (line.startsWith("{") && line.endsWith("}")) {
+        handleSaveUsb(line);
+      } else if (line == "RESTART") {
         ESP.restart();
-      } else if (serialBuffer == "SCAN_WIFI") {
+      } else if (line == "SCAN_WIFI") {
         wifiPrevConnected = (WiFi.status() == WL_CONNECTED);
         Serial.println("SCANNING");
         WiFi.mode(WIFI_STA);
@@ -97,8 +101,6 @@ void handleUsbWeb() {
         if (wifiPrevConnected) setupWiFi();
         return;
       }
-
-      serialBuffer = "";
     } else {
       serialBuffer += c;
       if (serialBuffer.length() > USB_BUFFER_LIMIT) {

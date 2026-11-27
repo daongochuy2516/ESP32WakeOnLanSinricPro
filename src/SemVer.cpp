@@ -1,22 +1,4 @@
-#pragma once
-
-#include <Arduino.h>
-
-class Version {
-  public:
-    Version(const String& versionStr);
-    String toString() const;
-
-    bool operator > (const Version& other) const;
-    bool operator < (const Version& other) const;
-    bool operator == (const Version& other) const;
-    bool operator != (const Version& other) const;
-
-  protected:
-    int major;
-    int minor;
-    int patch;
-};
+#include "SemVer.h"
 
 Version::Version(const String& versionStr) {
     int     firstDot  = versionStr.indexOf('.');
@@ -31,17 +13,13 @@ String Version::toString() const {
 }
 
 bool Version::operator>(const Version& other) const {
-    if (major > other.major) return true;
-    if (minor > other.minor) return true;
-    if (patch > other.patch) return true;
-    return false;
+    if (major != other.major) return major > other.major;
+    if (minor != other.minor) return minor > other.minor;
+    return patch > other.patch;
 }
 
 bool Version::operator<(const Version& other) const {
-    if (major < other.major) return true;
-    if (minor < other.minor) return true;
-    if (patch < other.patch) return true;
-    return false;
+    return other > *this;
 }
 
 bool Version::operator==(const Version& other) const {
